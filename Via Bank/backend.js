@@ -296,6 +296,15 @@ const ViaAPI = (() => {
   }
 
   // =============================
+  // ANALYTICS / GASTOS
+  // =============================
+
+  async function getSpendingAnalytics(period = "30d") {
+    const params = new URLSearchParams({ period });
+    return request(`/analytics/spending?${params}`);
+  }
+
+  // =============================
   // SAÚDE FINANCEIRA / SCORE
   // =============================
 

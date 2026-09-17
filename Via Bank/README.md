@@ -1,30 +1,36 @@
 # Via Bank
 
-Front-end de banco digital integrado a uma API local.
+Projeto full stack do **Via Bank**.
 
-## Arquivos
+## Estrutura
 
-- `login.html` — login e cadastro.
-- `index.html` — dashboard protegido.
-- `styles.css` — estilos do dashboard.
-- `app.js` — comportamento do dashboard e consumo da API.
-- `backend.js` — camada central de `fetch()` para o backend.
+```text
+Via Bank/
+├── index.html
+├── login.html
+├── styles.css
+├── app.js
+├── backend.js
+└── backend/
+    ├── pom.xml
+    ├── database/
+    ├── docs/
+    └── src/main/
+```
 
-## Rodar o front
+## Frontend
 
-Use Live Server no VS Code ou:
+O frontend roda separado, por exemplo com Live Server ou:
 
 ```bash
 python -m http.server 5500
 ```
 
-Depois abra:
+Abra:
 
 ```text
 http://localhost:5500/login.html
 ```
-
-## Backend esperado
 
 O arquivo `backend.js` aponta para:
 
@@ -32,20 +38,53 @@ O arquivo `backend.js` aponta para:
 http://localhost:3000/api
 ```
 
-O login usa:
+## Backend
 
-- `POST /auth/login`
-- body: `{ "email": "...", "password": "..." }`
-- resposta esperada: `{ "accessToken": "...", "user": {...} }`
+O backend foi feito com:
 
-O cadastro usa:
+- Java 21
+- Spring Boot
+- Maven
+- Spring Security
+- JWT
+- Spring Data JPA
+- MySQL
 
-- `POST /auth/register`
-- body: `name`, `cpf`, `email`, `phone`, `birthDate`, `password`
-- pode responder com `accessToken` para login automático ou sem token para o usuário fazer login.
+Entre na pasta:
 
-O dashboard só abre quando existir `via_access_token` no navegador. Uma resposta 401/403 da API limpa a sessão e volta ao login.
+```bash
+cd backend
+```
 
-## Sem backend
+Quando o banco MySQL estiver criado e configurado:
 
-Sem servidor em `localhost:3000`, login e cadastro exibem uma mensagem de backend indisponível e o dashboard não é liberado.
+```bash
+mvn spring-boot:run
+```
+
+A API sobe em:
+
+```text
+http://localhost:3000/api
+```
+
+## MySQL
+
+O banco ainda não precisa existir. As queries estão em:
+
+```text
+backend/database/01_schema.sql
+backend/database/02_seed_optional.sql
+backend/database/03_useful_queries.sql
+```
+
+A conexão está em `backend/src/main/resources/application.properties` e usa `CHANGE_ME` como senha padrão.
+
+## Fluxo principal
+
+1. Usuário cria conta no `login.html`.
+2. `POST /api/auth/register` cria usuário, conta, cartão, configurações e chaves PIX.
+3. O backend devolve JWT.
+4. O dashboard usa o token no header `Authorization`.
+5. Um PIX usa `POST /api/pix/send`.
+6. O backend bloqueia as contas envolvidas, valida o saldo, debita o remetente, credita o destinatário e grava as duas movimentações na mesma transação.
